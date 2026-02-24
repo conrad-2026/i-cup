@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>i-cup - Windows远程系统安装</title>
+    <style>
+        /* 基础样式，强制显示滚动条 */
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            overflow-y: auto; /* 解决内容查看无滚动条问题 */
+        }
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        /* 菜单按钮 */
+        .menu {
+            background-color: #0078d7;
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            cursor: pointer;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .menu:hover {
+            background-color: #005a9e;
+        }
+        /* 验证码/二维码区域 */
+        .verify-area {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .qrcode-img {
+            max-width: 350px;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .verify-form {
+            margin: 30px 0;
+            font-size: 18px;
+        }
+        .verify-form input {
+            padding: 12px;
+            width: 250px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .verify-form button {
+            padding: 12px 20px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .verify-form button:hover {
+            background-color: #005a9e;
+        }
+        /* 安装说明区域 */
+        .install-guide {
+            border: 2px solid #4CAF50;
+            padding: 25px;
+            margin-top: 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            background-color: #f0f8f0;
+            text-align: left;
+            display: none; /* 默认隐藏 */
+        }
+        .install-guide.show {
+            display: block !important; /* 验证成功后强制显示 */
+        }
+        .install-guide ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .install-guide li {
+            margin: 12px 0;
+            line-height: 1.8;
+        }
+        /* 提示文字 */
+        .error {
+            color: #dc3545;
+            margin: 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .msg {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        /* 开始安装按钮 */
+        .run-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .run-btn:hover {
+            background-color: #1e7e34;
+        }
+        /* 主区域默认隐藏 */
+        #main-section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>i-cup 远程系统安装服务</h1>
+    
+    <!-- 主菜单 -->
+    <div class="menu" onclick="document.getElementById('main-section').style.display='block'">
+        windows远程系统安装
+    </div>
+
+    <!-- 核心内容区域 -->
+    <div id="main-section">
+        <!-- 验证码+二维码区域 -->
+        <div id="verify-area" class="verify-area">
+            <h3>支付宝收款码（40元）</h3>
+            <!-- 适配GitHub Pages路径，直接指向仓库根目录的alipay.png -->
+            <img src="./alipay.png" alt="支付宝收款码" class="qrcode-img">
+            <p>缴费成功后，请联系客服：17713654484 索要验证码</p>
+
+            <div class="verify-form">
+                <input type="text" id="code-input" placeholder="输入验证码" required>
+                <button onclick="verifyCode()" type="button">验证</button>
+                <div id="error-msg" class="error"></div>
+            </div>
+        </div>
+
+        <!-- 安装说明区域（验证成功后显示） -->
+        <div id="install-guide" class="install-guide">
+            <h3>安装操作说明</h3>
+            <ul>
+                <li><strong>给本机安装系统：</strong>拔掉本机所有U盘，点击下方「开始安装」按钮后，关闭弹出的小窗口，稍等片刻选择「重装系统」模式；</li>
+                <li><strong>给其他电脑安装：</strong>给本机插入准备好的U盘，点击下方「开始安装」按钮后，在弹出的小窗口点击 [浏览]，选择U盘后点击 [选择文件夹]、然后点击 [确定]，在工具中选择「U盘启动」模式，点击 [制作启动U盘], 点击 [确定]，勾选系统版本后，选择 [只制作启动U盘]，完成后，将该U盘拔出、插入要安装系统的电脑，选择U盘启动安装系统；</li>
+            </ul>
+            <div style="margin-top: 20px; text-align:center;">
+                <button class="run-btn" onclick="runInstall()" type="button">开始安装</button>
+                <div id="run-msg" class="msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 本地验证码验证逻辑（静态页面适配）
+        // 1-7对应周一到周日，可自行修改正确验证码
+        function getTodayCode() {
+            const weekday = new Date().getDay(); // 0=周日,1=周一...6=周六
+            const codeMap = {
+                1: "mon8888", 2: "tue9999", 3: "wed7777",
+                4: "thu6666", 5: "fri5555", 6: "sat4444",
+                0: "sun3333"
+            };
+            return codeMap[weekday];
+        }
+
+        // 验证验证码
+        function verifyCode() {
+            const userCode = document.getElementById('code-input').value.trim();
+            const rightCode = getTodayCode();
+            const errorMsg = document.getElementById('error-msg');
+
+            if (userCode === rightCode) {
+                errorMsg.textContent = "";
+                document.getElementById('verify-area').style.display = "none";
+                document.getElementById('install-guide').classList.add('show');
+            } else {
+                errorMsg.textContent = "验证码错误！请联系客服确认正确验证码后重新输入";
+            }
+        }
+
+        // 开始安装按钮逻辑
+        function runInstall() {
+            const runMsg = document.getElementById('run-msg');
+            runMsg.textContent = "✅ 安装程序已启动，请按照上方说明操作！";
+            // 若需本地运行exe，可在此处添加逻辑（静态页面仅提示）
+        }
+    </script>
+</body>
+</html>
