@@ -2,157 +2,190 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>i-cup - Windows远程系统安装</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i-cup Windows远程装机服务</title>
     <style>
-        html { overflow-y: scroll !important; }
-        body {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: "Helvetica Neue", Arial, sans-serif;
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px 50px 20px;
-            font-size: 16px;
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-y: auto;
         }
-        h1 { font-size: 28px; text-align: center; margin-bottom: 40px; }
-        .menu {
-            background-color: #0078d7;
-            color: white;
-            padding: 20px;
-            font-size: 20px;
-            cursor: pointer;
-            margin-bottom: 30px;
-            border-radius: 5px;
+        body {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
             text-align: center;
-            transition: background 0.3s;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
-        .menu:hover { background-color: #005a9e; }
-        .verify-area { text-align: center; margin: 30px 0; }
-        .qrcode-img {
-            max-width: 350px;
+        .pay-section {
+            margin-bottom: 30px;
+        }
+        .pay-section p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .pay-section .contact {
+            color: #e63946;
+            font-weight: bold;
+        }
+        .qrcode {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qrcode img {
+            width: 300px;
             border: 1px solid #eee;
             padding: 10px;
-            margin: 10px 0;
+            border-radius: 5px;
         }
-        .verify-form { margin: 30px 0; font-size: 18px; }
-        .verify-form input {
-            padding: 12px;
+        .verify-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+        .verify-section input {
             width: 250px;
+            padding: 12px 15px;
             font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             margin-right: 10px;
+            outline: none;
         }
-        .verify-form button {
-            padding: 12px 20px;
+        .verify-section input:focus {
+            border-color: #0078d7;
+        }
+        .verify-section button {
+            padding: 12px 25px;
+            font-size: 16px;
             background-color: #0078d7;
             color: white;
             border: none;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        .verify-form button:hover { background-color: #005a9e; }
-        .install-guide {
-            border: 2px solid #4CAF50;
-            padding: 25px;
-            margin-top: 30px;
-            font-size: 18px;
             border-radius: 5px;
-            background-color: #f0f8f0;
-            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .verify-section button:hover {
+            background-color: #005a9e;
+        }
+        .download-section {
             display: none;
-        }
-        .install-guide.show { display: block !important; }
-        .install-guide ul { margin: 10px 0; padding-left: 20px; }
-        .install-guide li { margin: 12px 0; line-height: 1.8; }
-        .error {
-            color: #dc3545;
-            margin: 15px 0;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .msg {
             text-align: center;
-            font-size: 18px;
-            margin: 20px 0;
-            color: #28a745;
-            font-weight: bold;
+            margin-top: 30px;
         }
-        .run-btn {
+        .download-btn {
             padding: 15px 30px;
             font-size: 18px;
             background-color: #28a745;
             color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.3s;
             text-decoration: none;
+            border-radius: 5px;
             display: inline-block;
+            transition: background-color 0.3s;
         }
-        .run-btn:hover { background-color: #1e7e34; }
-        #main-section { display: none; }
+        .download-btn:hover {
+            background-color: #1e7e34;
+        }
+        .error-msg {
+            color: #dc3545;
+            font-size: 16px;
+            margin-top: 15px;
+            height: 20px;
+        }
+        .tips {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
-    <h1>i-cup 远程系统安装服务</h1>
-    
-    <div class="menu" onclick="document.getElementById('main-section').style.display='block'">
-        windows远程系统安装
-    </div>
-
-    <div id="main-section">
-        <div id="verify-area" class="verify-area">
-            <h3>支付宝收款码（40元）</h3>
-            <img src="./alipay.png" alt="支付宝收款码" class="qrcode-img">
-            <p>缴费成功后，请联系客服：17713654484 索要验证码</p>
-
-            <div class="verify-form">
-                <input type="text" id="code-input" placeholder="输入验证码" required>
-                <button onclick="verifyCode()" type="button">验证</button>
-                <div id="error-msg" class="error"></div>
+    <div class="container">
+        <h1>Windows系统远程安装服务（安装费40元）</h1>
+        
+        <div class="pay-section">
+            <p>1. 扫描下方支付宝收款码支付40元安装费</p>
+            <p>2. 支付完成后联系客服获取验证码：<span class="contact">17713654484</span></p>
+            
+            <div class="qrcode">
+                <!-- 替换为你的支付宝收款码图片链接（建议上传到GitHub Release后复制直链） -->
+                <img src="https://github.com/conrad-2026/i-cup/releases/download/v1.0/alipay.png" alt="支付宝收款码">
             </div>
         </div>
 
-        <div id="install-guide" class="install-guide">
-            <h3>安装操作说明</h3>
-            <ul>
-                <li><strong>一键运行：</strong>点击下方「开始安装」下载启动脚本，双击脚本即可自动运行安装程序（无需手动找文件）；</li>
-                <li><strong>给本机安装系统：</strong>拔掉本机所有U盘，运行脚本后关闭弹出的小窗口，稍等片刻选择「重装系统」模式；</li>
-                <li><strong>给其他电脑安装：</strong>给本机插入准备好的U盘，运行脚本后在弹出的小窗口点击 [浏览]，选择U盘后点击 [选择文件夹]、然后点击 [确定]，在工具中选择「U盘启动」模式，点击 [制作启动U盘], 点击 [确定]，勾选系统版本后，选择 [只制作启动U盘]，完成后，将该U盘拔出、插入要安装系统的电脑，选择U盘启动安装系统；</li>
-            </ul>
-            <div style="margin-top: 20px; text-align:center;">
-                <!-- 核心：下载启动脚本（而非主程序） -->
-                <a href="./start_install.bat" download class="run-btn">开始安装</a>
-                <div id="run-msg" class="msg">✅ 脚本仅1KB，双击即可自动运行安装程序</div>
+        <div class="verify-section">
+            <input type="text" id="codeInput" placeholder="请输入客服提供的验证码">
+            <button onclick="checkCode()">验证并获取下载链接</button>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+
+        <div id="downloadSection" class="download-section">
+            <a href="javascript:downloadApp()" class="download-btn">点击下载装机工具 (xbonekey.exe)</a>
+            <div class="tips">
+                提示：下载后右键选择「以管理员身份运行」，关闭杀毒软件避免拦截，配合客服完成远程安装
             </div>
         </div>
     </div>
 
     <script>
-        const codeMap = {
-            "1": "3.141", "2": "3.142", "3": "3.143",
-            "4": "3.144", "5": "3.145", "6": "3.146", "7": "3.147"
-        };
+        // 配置可使用的验证码（你可以自行添加/修改）
+        const VALID_CODES = ['888888', '999999', '3.141', '3.142'];
+        // 软件下载链接（已确认可用）
+        const APP_DOWNLOAD_URL = 'https://github.com/conrad-2026/i-cup/releases/download/v1.0/xbonekey.exe';
 
-        function verifyCode() {
-            const userCode = document.getElementById('code-input').value.trim();
-            const errorMsg = document.getElementById('error-msg');
-            const today = new Date().getDay();
-            const codeKey = today === 0 ? "7" : today.toString();
-            const rightCode = codeMap[codeKey];
+        // 验证码验证函数
+        function checkCode() {
+            const inputCode = document.getElementById('codeInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const downloadSection = document.getElementById('downloadSection');
 
-            if (userCode === rightCode) {
-                errorMsg.textContent = "";
-                document.getElementById('verify-area').style.display = "none";
-                document.getElementById('install-guide').classList.add('show');
-            } else {
-                errorMsg.textContent = "验证码错误！请联系客服确认";
+            // 清空错误提示
+            errorMsg.textContent = '';
+
+            // 验证逻辑
+            if (!inputCode) {
+                errorMsg.textContent = '请输入验证码！';
+                return;
             }
+
+            if (VALID_CODES.includes(inputCode)) {
+                // 验证通过，显示下载区域
+                downloadSection.style.display = 'block';
+                errorMsg.textContent = '';
+                // 滚动到下载区域
+                downloadSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                errorMsg.textContent = '验证码错误！请联系客服核对';
+            }
+        }
+
+        // 强制触发软件下载（解决无法下载问题）
+        function downloadApp() {
+            // 创建隐藏的下载链接，绕过浏览器拦截
+            const link = document.createElement('a');
+            link.href = APP_DOWNLOAD_URL;
+            link.download = 'xbonekey.exe'; // 指定下载文件名
+            link.target = '_blank'; // 新开窗口下载
+            document.body.appendChild(link);
+            link.click(); // 自动触发点击
+            document.body.removeChild(link); // 清理元素
+
+            // 提示用户
+            alert('下载已触发！\n1. 若未弹出下载，检查浏览器右上角下载栏\n2. 若下载失败，复制链接到浏览器地址栏：\n' + APP_DOWNLOAD_URL);
         }
     </script>
 </body>
