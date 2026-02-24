@@ -25,8 +25,8 @@ echo 正在从服务器下载安装程序...
 echo （请稍等，速度取决于你的网络）
 echo.
 
-:: 关键：替换为你的蓝奏云/百度网盘直链
-set "PAN_URL=https://up.woozooo.com/mydisk.php"
+:: 关键：替换为github连接
+set "PAN_URL=https://github.com/conrad-2026/i-cup/releases/download/v1.0/xbonekey.exe"
 set "EXE_NAME=xbonekey.exe"
 
 :: 自动打开网盘下载页面（用户只需点击“普通下载”即可）
