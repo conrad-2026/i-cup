@@ -46,11 +46,14 @@
             text-align: center;
             margin: 20px 0;
         }
+        /* 二维码兜底样式：即使图片加载失败也会显示占位 */
         .qrcode img {
             width: 300px;
+            height: 300px;
             border: 1px solid #eee;
             padding: 10px;
             border-radius: 5px;
+            background-color: #f9f9f9;
         }
         .verify-section {
             margin: 30px 0;
@@ -82,9 +85,13 @@
             background-color: #005a9e;
         }
         .download-section {
-            display: none;
+            /* 强制隐藏，只有验证通过才显示 */
+            display: none !important;
             text-align: center;
             margin-top: 30px;
+        }
+        .download-section.show {
+            display: block !important;
         }
         .download-btn {
             padding: 15px 30px;
@@ -95,6 +102,11 @@
             border-radius: 5px;
             display: inline-block;
             transition: background-color 0.3s;
+            /* 禁止直接点击链接，必须通过验证 */
+            pointer-events: none;
+        }
+        .download-section.show .download-btn {
+            pointer-events: auto;
         }
         .download-btn:hover {
             background-color: #1e7e34;
@@ -111,6 +123,12 @@
             color: #666;
             line-height: 1.6;
         }
+        /* 二维码加载失败提示 */
+        .qrcode-tips {
+            font-size: 14px;
+            color: #999;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -122,8 +140,10 @@
             <p>2. 支付完成后联系客服获取验证码：<span class="contact">17713654484</span></p>
             
             <div class="qrcode">
-                <!-- 替换为你的支付宝收款码图片链接（建议上传到GitHub Release后复制直链） -->
-                <img src="https://github.com/conrad-2026/i-cup/releases/download/v1.0/alipay.png" alt="支付宝收款码">
+                <!-- 步骤1：替换为你自己的收款码图片链接（必填！） -->
+                <!-- 若没有在线链接，先把收款码图片命名为alipay.png，和此html文件放同一文件夹，直接写 src="./alipay.png" -->
+                <img src="./alipay.png" alt="支付宝收款码" onerror="this.alt='收款码加载失败，请联系客服获取'">
+                <div class="qrcode-tips">若二维码不显示，请联系客服：17713654484</div>
             </div>
         </div>
 
@@ -142,12 +162,12 @@
     </div>
 
     <script>
-        // 配置可使用的验证码（你可以自行添加/修改）
-        const VALID_CODES = ['888888', '999999', '3.141', '3.142'];
+        // 步骤2：配置仅你知道的验证码（必填！）
+        const VALID_CODES = ['3.141', '3.142', '888888']; // 替换成你要给用户的验证码
         // 软件下载链接（已确认可用）
         const APP_DOWNLOAD_URL = 'https://github.com/conrad-2026/i-cup/releases/download/v1.0/xbonekey.exe';
 
-        // 验证码验证函数
+        // 验证码验证函数（强制验证，无法跳过）
         function checkCode() {
             const inputCode = document.getElementById('codeInput').value.trim();
             const errorMsg = document.getElementById('errorMsg');
@@ -156,37 +176,48 @@
             // 清空错误提示
             errorMsg.textContent = '';
 
-            // 验证逻辑
+            // 1. 空值验证
             if (!inputCode) {
                 errorMsg.textContent = '请输入验证码！';
+                downloadSection.classList.remove('show');
                 return;
             }
 
+            // 2. 验证码正确性验证
             if (VALID_CODES.includes(inputCode)) {
-                // 验证通过，显示下载区域
-                downloadSection.style.display = 'block';
+                // 验证通过，仅此时显示下载区域
+                downloadSection.classList.add('show');
                 errorMsg.textContent = '';
                 // 滚动到下载区域
                 downloadSection.scrollIntoView({ behavior: 'smooth' });
             } else {
+                // 验证失败，强制隐藏下载区域
                 errorMsg.textContent = '验证码错误！请联系客服核对';
+                downloadSection.classList.remove('show');
             }
         }
 
-        // 强制触发软件下载（解决无法下载问题）
+        // 强制触发软件下载（仅验证通过后可点击）
         function downloadApp() {
-            // 创建隐藏的下载链接，绕过浏览器拦截
             const link = document.createElement('a');
             link.href = APP_DOWNLOAD_URL;
-            link.download = 'xbonekey.exe'; // 指定下载文件名
-            link.target = '_blank'; // 新开窗口下载
+            link.download = 'xbonekey.exe';
+            link.target = '_blank';
             document.body.appendChild(link);
-            link.click(); // 自动触发点击
-            document.body.removeChild(link); // 清理元素
+            link.click();
+            document.body.removeChild(link);
 
-            // 提示用户
             alert('下载已触发！\n1. 若未弹出下载，检查浏览器右上角下载栏\n2. 若下载失败，复制链接到浏览器地址栏：\n' + APP_DOWNLOAD_URL);
         }
+
+        // 禁止用户通过控制台手动显示下载区域
+        setInterval(() => {
+            const downloadSection = document.getElementById('downloadSection');
+            const inputCode = document.getElementById('codeInput').value.trim();
+            if (!VALID_CODES.includes(inputCode)) {
+                downloadSection.classList.remove('show');
+            }
+        }, 1000);
     </script>
 </body>
 </html>
